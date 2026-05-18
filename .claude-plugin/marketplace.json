@@ -6,13 +6,10 @@
     "name": "Aleksei Moskalenko",
     "email": "justautumn4@gmail.com"
   },
-  "metadata": {
-    "pluginRoot": "./plugins"
-  },
   "plugins": [
     {
       "name": "keychain-command",
-      "source": "keychain-command",
+      "source": "./plugins/keychain-command",
       "description": "Generate macOS Keychain wrappers so Claude executes secret-bearing commands without ever seeing the secret.",
       "category": "security",
       "tags": ["macos", "keychain", "secrets", "psql", "mysql", "redis", "http"],
