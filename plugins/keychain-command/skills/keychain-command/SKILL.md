@@ -11,7 +11,16 @@ description: |
   live in macOS Keychain. Use BEFORE suggesting any plaintext secret in
   chat or in a file.
 argument-hint: add | run <name> [args...] | list | remove <name>
-allowed-tools: Bash(mkdir -p ~/.claude-work/secret-commands/bin), Bash(touch ~/.claude-work/secret-commands/REGISTRY.md), Bash(ls ~/.claude-work/secret-commands/bin*), Bash(~/.claude-work/secret-commands/bin/*), Bash(security find-generic-password -a * -s claude.*), Bash(chmod +x ~/.claude-work/secret-commands/bin/*), Read, Edit, Write
+allowed-tools:
+  - Bash(mkdir -p ~/.claude-work/secret-commands/bin)
+  - Bash(touch ~/.claude-work/secret-commands/REGISTRY.md)
+  - Bash(ls ~/.claude-work/secret-commands/bin*)
+  - Bash(~/.claude-work/secret-commands/bin/*)
+  - Bash(security find-generic-password -a * -s claude.*)
+  - Bash(chmod +x ~/.claude-work/secret-commands/bin/*)
+  - Read
+  - Edit
+  - Write
 ---
 
 # Keychain Command

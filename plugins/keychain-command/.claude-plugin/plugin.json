@@ -1,6 +1,6 @@
 {
   "name": "keychain-command",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Generate macOS Keychain wrappers so Claude executes secret-bearing commands without ever seeing the secret.",
   "author": {
     "name": "Aleksei Moskalenko",
