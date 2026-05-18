@@ -1,0 +1,10 @@
+{
+  "name": "keychain-command",
+  "description": "Generate macOS Keychain wrappers so Claude executes secret-bearing commands without ever seeing the secret.",
+  "author": {
+    "name": "Aleksei Moskalenko",
+    "email": "justautumn4@gmail.com"
+  },
+  "license": "MIT",
+  "keywords": ["macos", "keychain", "secrets", "psql", "mysql", "redis", "http"]
+}
