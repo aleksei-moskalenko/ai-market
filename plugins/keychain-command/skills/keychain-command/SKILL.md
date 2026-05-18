@@ -12,12 +12,12 @@ description: |
   chat or in a file.
 argument-hint: add | run <name> [args...] | list | remove <name>
 allowed-tools:
-  - Bash(mkdir -p ~/.claude-work/secret-commands/bin)
-  - Bash(touch ~/.claude-work/secret-commands/REGISTRY.md)
-  - Bash(ls ~/.claude-work/secret-commands/bin*)
-  - Bash(~/.claude-work/secret-commands/bin/*)
+  - Bash(mkdir -p *secret-commands/bin*)
+  - Bash(touch *secret-commands/REGISTRY.md*)
+  - Bash(ls *secret-commands/bin*)
+  - Bash(*secret-commands/bin/*)
   - Bash(security find-generic-password -a * -s claude.*)
-  - Bash(chmod +x ~/.claude-work/secret-commands/bin/*)
+  - Bash(chmod +x *secret-commands/bin/*)
   - Read
   - Edit
   - Write
@@ -63,8 +63,16 @@ Claude MAY:
 
 ## Layout
 
+Wrapper storage is rooted at the **current Claude config directory**:
+`$CLAUDE_CONFIG_DIR/secret-commands/`, falling back to
+`~/.claude/secret-commands/` when `CLAUDE_CONFIG_DIR` is unset. Every
+shell snippet in this skill expands the base via
+`"${CLAUDE_CONFIG_DIR:-$HOME/.claude}/secret-commands"` so the same skill
+works for users on the default config dir and for users who relocated
+it (e.g. `~/.claude-work`).
+
 ```
-~/.claude-work/secret-commands/
+$CLAUDE_CONFIG_DIR/secret-commands/    # ~/.claude/secret-commands/ by default
   REGISTRY.md         # human/Claude-readable index of wrappers
   bin/                # generated wrappers, chmod +x
     <name>            # e.g. sql-home-pg, gh-personal
@@ -73,25 +81,27 @@ Claude MAY:
 Keychain entries use service name `claude.<name>` (`security` `-s` flag),
 account = `$USER`.
 
-This storage is **shared** with any other keychain-wrapper skills on the
-machine (e.g. team-specific `gm-keychain-command`). Wrappers and
-`REGISTRY.md` entries created by one skill are visible to the others.
-Pick wrapper names accordingly (`sql-personal-pi`, `gh-personal`, etc.)
-to avoid collisions with work entries.
+This storage is **shared** with any other keychain-wrapper skills that
+target the same config dir (e.g. team-specific `gm-keychain-command`).
+Wrappers and `REGISTRY.md` entries created by one skill are visible to
+the others. Pick wrapper names accordingly (`sql-personal-pi`,
+`gh-personal`, etc.) to avoid collisions with work entries.
 
 ## First-time setup
 
-If `~/.claude-work/secret-commands/bin/` does not exist, create the layout:
+If the base directory does not yet exist, create the layout (one Bash
+call so the env var resolves consistently):
 
 ```bash
-mkdir -p ~/.claude-work/secret-commands/bin
-touch ~/.claude-work/secret-commands/REGISTRY.md
+mkdir -p "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/secret-commands/bin"
+touch "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/secret-commands/REGISTRY.md"
 ```
 
 That is the entire setup. Wrappers are always invoked by **full path**:
-`~/.claude-work/secret-commands/bin/<name>`. Do NOT modify the user's
-shell profile (`.zshrc`, `.bashrc`, etc.) — the absolute path is
-deterministic, so PATH manipulation is unnecessary and adds risk.
+`"${CLAUDE_CONFIG_DIR:-$HOME/.claude}/secret-commands/bin/<name>"`. Do
+NOT modify the user's shell profile (`.zshrc`, `.bashrc`, etc.) — the
+expansion is deterministic, so PATH manipulation is unnecessary and adds
+risk.
 
 ## Subcommand: `add` — register a new secret command
 
@@ -118,15 +128,17 @@ themselves.
    only affects which `security` command Claude shows them in Phase B.
 
 3. Generate the wrapper from the chosen template (see Templates), write
-   to `~/.claude-work/secret-commands/bin/<name>`, then `chmod +x`.
+   to `"${CLAUDE_CONFIG_DIR:-$HOME/.claude}/secret-commands/bin/<name>"`,
+   then `chmod +x`.
 
-4. Append to `REGISTRY.md`:
+4. Append to `REGISTRY.md` (located at
+   `"${CLAUDE_CONFIG_DIR:-$HOME/.claude}/secret-commands/REGISTRY.md"`):
    ```markdown
    ## <name>
    - Description: <description>
    - Template: <template>
    - Keychain service: claude.<name>
-   - Wrapper: ~/.claude-work/secret-commands/bin/<name>
+   - Wrapper: $CLAUDE_CONFIG_DIR/secret-commands/bin/<name>
    - Created: <YYYY-MM-DD>
    - Usage: <one-line example>
    ```
@@ -173,8 +185,9 @@ After the user confirms they ran the command:
 
 ## Subcommand: `run <name> [args...]`
 
-Call the wrapper by its full absolute path:
-`~/.claude-work/secret-commands/bin/<name>`. Never inline the secret.
+Call the wrapper by its full path, expanding the config dir at exec
+time: `"${CLAUDE_CONFIG_DIR:-$HOME/.claude}/secret-commands/bin/<name>"`.
+Never inline the secret.
 
 If `<name>` is unknown, read `REGISTRY.md` and tell the user what is
 available.
@@ -191,7 +204,7 @@ Same two-phase split.
 ### Phase A — Claude
 
 1. Confirm with the user.
-2. `rm ~/.claude-work/secret-commands/bin/<name>`.
+2. `rm "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/secret-commands/bin/<name>"`.
 3. Edit `REGISTRY.md` to drop the section.
 4. Print the command for the user to run themselves to delete the
    Keychain entry:
