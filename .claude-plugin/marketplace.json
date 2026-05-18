@@ -12,7 +12,7 @@
   "plugins": [
     {
       "name": "keychain-command",
-      "source": "./keychain-command",
+      "source": "keychain-command",
       "description": "Generate macOS Keychain wrappers so Claude executes secret-bearing commands without ever seeing the secret.",
       "category": "security",
       "tags": ["macos", "keychain", "secrets", "psql", "mysql", "redis", "http"],
